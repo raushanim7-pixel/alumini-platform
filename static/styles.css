@@ -1,0 +1,73 @@
+/* Custom Academic Theme & Styling */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap');
+
+:root {
+  --primary-navy: #0A2540;
+  --secondary-navy: #0F3256;
+  --academic-gold: #C59B27;
+  --gold-hover: #D4A72C;
+  --surface-slate: #F8FAFC;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #F8FAFC;
+  color: #1E293B;
+}
+
+.font-serif-title {
+  font-family: 'Cinzel', serif;
+}
+
+.font-quote {
+  font-family: 'Playfair Display', serif;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Digital Alumni Card badge glow */
+.alumni-card-gradient {
+  background: linear-gradient(135deg, #0A2540 0%, #163B66 50%, #0F2A4A 100%);
+  border: 1px solid rgba(197, 155, 39, 0.35);
+  box-shadow: 0 10px 25px -5px rgba(10, 37, 64, 0.4), 0 8px 10px -6px rgba(10, 37, 64, 0.2);
+}
+
+.gold-accent-border {
+  border-left: 4px solid var(--academic-gold);
+}
+
+/* Modal transitions */
+.modal-overlay {
+  background-color: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+/* 80G Tax Certificate printable layout */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #tax-receipt-printable, #tax-receipt-printable * {
+    visibility: visible;
+  }
+  #tax-receipt-printable {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}

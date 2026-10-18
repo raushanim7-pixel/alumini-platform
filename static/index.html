@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Alumni OS — Centralised Alumni Data & Engagement Platform</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- QR Code Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/static/styles.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              900: '#0A2540',
+              800: '#0F3256',
+              700: '#163B66',
+              600: '#204C7E'
+            },
+            gold: {
+              500: '#C59B27',
+              600: '#B0881E',
+              100: '#FDF8EA'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- TOP INSTITUTIONAL BAR -->
+  <header class="bg-brand-900 text-white shadow-md sticky top-0 z-40 border-b border-brand-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo & Branding -->
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('directory')">
+          <div class="w-10 h-10 rounded-lg bg-gold-500 flex items-center justify-center text-brand-900 font-bold shadow-md">
+            <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="font-serif-title font-bold text-base tracking-wider text-white">APEX INSTITUTE</div>
+            <div class="text-xs text-gold-500 font-medium tracking-wide">Central Alumni Management OS (50,000+ Alumni)</div>
+          </div>
+        </div>
+
+        <!-- Role Switcher & Persona Indicator -->
+        <div class="flex items-center space-x-4">
+          <div class="hidden md:flex items-center bg-brand-800/80 rounded-full px-3 py-1 border border-brand-700 text-xs">
+            <span class="text-slate-300 mr-2">Viewing as:</span>
+            <select id="role-selector" onchange="changeRole(this.value)" class="bg-transparent text-gold-500 font-semibold focus:outline-none cursor-pointer">
+              <option value="ALUMNI" class="bg-brand-900 text-white">Alumnus (Vikram Mehta - Google)</option>
+              <option value="STUDENT" class="bg-brand-900 text-white">Student (Arjun Rathore - 3rd Yr)</option>
+              <option value="ADMIN" class="bg-brand-900 text-white">Alumni Office Staff (Central Admin)</option>
+              <option value="COORDINATOR" class="bg-brand-900 text-white">Dept Coordinator (CSE)</option>
+              <option value="SUPER_ADMIN" class="bg-brand-900 text-white">Super Admin (System CIO)</option>
+            </select>
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <button onclick="openVerificationModal()" class="bg-gold-500 hover:bg-gold-600 text-brand-900 font-semibold px-3 py-1.5 rounded-lg text-xs flex items-center space-x-1.5 transition shadow">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            <span id="claim-btn-text">Claim Profile</span>
+          </button>
+
+          <!-- User Avatar / Profile Dropdown -->
+          <div class="flex items-center space-x-2 border-l border-brand-700 pl-4">
+            <img id="user-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="User Avatar" class="w-8 h-8 rounded-full border border-gold-500 object-cover">
+            <div class="hidden lg:block text-left leading-tight">
+              <div id="user-display-name" class="text-xs font-semibold text-white">Vikramaditya Mehta</div>
+              <div id="user-role-label" class="text-[10px] text-slate-300">Class of '18 • Verified</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MAIN NAVIGATION TABS -->
+    <div class="bg-brand-800 border-t border-brand-700 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto flex space-x-1 overflow-x-auto py-1 text-xs font-medium text-slate-200">
+        <button onclick="switchTab('directory')" class="nav-tab px-3 py-2 rounded-md hover:bg-brand-700 transition flex items-center space-x-1.5 active-tab" data-tab="directory">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>Directory & Network</span>
+        </button>
+        <button onclick="switchTab('verification')" class="nav-tab px-3 py-2 rounded-md hover:bg-brand-700 transition flex items-center space-x-1.5" data-tab="verification">
+          <i data-lucide="user-check" class="w-4 h-4"></i>
+          <span>Verification & Onboarding</span>
+        </button>
+        <button onclick="switchTab('events')" class="nav-tab px-3 py-2 rounded-md hover:bg-brand-700 transition flex items-center space-x-1.5" data-tab="events">
+          <i data-lucide="calendar" class="w-4 h-4"></i>
+          <span>Events & Reunions</span>
+        </button>
+        <button onclick="switchTab('mentorship')" class="nav-tab px-3 py-2 rounded-md hover:bg-brand-700 transition flex items-center space-x-1.5" data-tab="mentorship">
+          <i data-lucide="briefcase" class="w-4 h-4"></i>
+          <span>Mentorship & Jobs</span>
+        </button>
+        <button onclick="switchTab('giving')" class="nav-tab px-3 py-2 rounded-md hover:bg-brand-700 transition flex items-center space-x-1.5" data-tab="giving">
+          <i data-lucide="heart-handshake" class="w-4 h-4"></i>
+          <span>Giving & 80G Tax Exemption</span>
+        </button>
+        <button onclick="switchTab('stories')" class="nav-tab px-3 py-2 rounded-md hover:bg-brand-700 transition flex items-center space-x-1.5" data-tab="stories">
+          <i data-lucide="newspaper" class="w-4 h-4"></i>
+          <span>News & Spotlights</span>
+        </button>
+        <button onclick="switchTab('analytics')" class="nav-tab px-3 py-2 rounded-md hover:bg-brand-700 transition flex items-center space-x-1.5" data-tab="analytics">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          <span>Analytics & NIRF</span>
+        </button>
+        <button id="nav-governance" onclick="switchTab('governance')" class="nav-tab px-3 py-2 rounded-md hover:bg-brand-700 transition flex items-center space-x-1.5" data-tab="governance">
+          <i data-lucide="shield-alert" class="w-4 h-4"></i>
+          <span>Data Governance & DPDP</span>
+        </button>
+        <button onclick="switchTab('my-profile')" class="nav-tab px-3 py-2 rounded-md hover:bg-brand-700 transition flex items-center space-x-1.5" data-tab="my-profile">
+          <i data-lucide="id-card" class="w-4 h-4"></i>
+          <span>My Profile & Digital ID</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN VIEWPORT CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    
+    <!-- NOTIFICATION / TOAST CONTAINER -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform transition-all duration-300 translate-y-24 opacity-0 pointer-events-none">
+      <div class="bg-brand-900 text-white border-l-4 border-gold-500 px-4 py-3 rounded-r-lg shadow-xl flex items-center space-x-3 text-sm">
+        <i id="toast-icon" data-lucide="check-circle" class="w-5 h-5 text-gold-500"></i>
+        <span id="toast-msg">Operation completed successfully.</span>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- TAB 1: DIRECTORY & SEARCH                                      -->
+    <!-- ============================================================== -->
+    <section id="view-directory" class="tab-view block space-y-6">
+      
+      <!-- Search & Facet Bar -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+          <div>
+            <h1 class="text-xl font-bold text-brand-900 flex items-center space-x-2">
+              <i data-lucide="compass" class="w-5 h-5 text-gold-500"></i>
+              <span>Alumni Directory & Search</span>
+            </h1>
+            <p class="text-xs text-slate-500">Discover batchmates, industry peers, and leaders across 50,000+ living alumni.</p>
+          </div>
+          <div class="flex items-center space-x-3">
+            <span class="text-xs bg-slate-100 text-slate-700 px-3 py-1.5 rounded-full font-medium" id="search-count-badge">
+              Loading verified records...
+            </span>
+          </div>
+        </div>
+
+        <!-- Inputs Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
+            <input id="dir-search" type="text" placeholder="Search by name, company, skill..." oninput="handleSearchFilter()" class="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-700 focus:outline-none">
+          </div>
+          <div>
+            <select id="dir-dept" onchange="handleSearchFilter()" class="w-full py-2 px-3 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-700 focus:outline-none bg-white">
+              <option value="">All Academic Departments</option>
+              <option value="Computer Science & Engineering">Computer Science & Engineering</option>
+              <option value="Electronics & Communication">Electronics & Communication</option>
+              <option value="Mechanical Engineering">Mechanical Engineering</option>
+              <option value="School of Management">School of Management (MBA)</option>
+              <option value="Electrical Engineering">Electrical Engineering</option>
+            </select>
+          </div>
+          <div>
+            <select id="dir-year" onchange="handleSearchFilter()" class="w-full py-2 px-3 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-700 focus:outline-none bg-white">
+              <option value="">All Graduation Years</option>
+              <option value="2022">Class of 2022</option>
+              <option value="2019">Class of 2019</option>
+              <option value="2018">Class of 2018</option>
+              <option value="2014">Class of 2014</option>
+              <option value="2012">Class of 2012</option>
+            </select>
+          </div>
+          <div>
+            <input id="dir-city" type="text" placeholder="Filter by City / Country" oninput="handleSearchFilter()" class="w-full py-2 px-3 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-700 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Quick Filter Toggles -->
+        <div class="flex flex-wrap items-center gap-3 mt-4 pt-3 border-t border-slate-100 text-xs">
+          <label class="flex items-center space-x-1.5 cursor-pointer text-slate-600 hover:text-brand-900">
+            <input id="dir-mentor-filter" type="checkbox" onchange="handleSearchFilter()" class="rounded text-brand-900 focus:ring-0">
+            <span>🤝 Open to Mentorship</span>
+          </label>
+          <label class="flex items-center space-x-1.5 cursor-pointer text-slate-600 hover:text-brand-900">
+            <input id="dir-hire-filter" type="checkbox" onchange="handleSearchFilter()" class="rounded text-brand-900 focus:ring-0">
+            <span>💼 Hiring / Alumni Referrals</span>
+          </label>
+          <span class="text-slate-300">|</span>
+          <span class="text-slate-400 text-[11px] flex items-center">
+            <i data-lucide="lock" class="w-3 h-3 mr-1 text-slate-400"></i> Contact info masked per DPDP Act 2023 consent preferences
+          </span>
+        </div>
+      </div>
+
+      <!-- Alumni Profiles Cards Grid -->
+      <div id="alumni-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 2: VERIFICATION & CLAIM ONBOARDING                         -->
+    <!-- ============================================================== -->
+    <section id="view-verification" class="tab-view hidden space-y-6">
+      
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="bg-brand-900 text-white p-6">
+          <div class="max-w-2xl">
+            <span class="text-xs uppercase font-semibold tracking-wider text-gold-500">Master Record Verification</span>
+            <h2 class="text-2xl font-serif-title font-bold mt-1">Claim Your Permanent Alumni Identity</h2>
+            <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+              Connect your verified academic degree to the institutional alumni database. Enjoy lifetime campus access, gate pass entry, mentor pairing, and alumni email privileges.
+            </p>
+          </div>
+        </div>
+
+        <div class="p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          <!-- Instant ERP Lookup Column -->
+          <div class="lg:col-span-7 space-y-5">
+            <div class="flex items-center space-x-2 text-sm font-semibold text-brand-900 border-b pb-2">
+              <span class="w-6 h-6 rounded-full bg-brand-900 text-white flex items-center justify-center text-xs">1</span>
+              <span>Method A: Instant Pre-Seeded Lookup (Roll Number + OTP)</span>
+            </div>
+
+            <div class="bg-slate-50 border border-slate-200 p-4 rounded-lg space-y-3">
+              <p class="text-xs text-slate-600">Enter your official institutional Enrolment Number and Graduation Year to query our Student Information System (SIS) records.</p>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] font-medium text-slate-700 mb-1">Enrolment / Roll No.</label>
+                  <input id="claim-roll" type="text" placeholder="e.g. 16BCS099 or 14BCS042" class="w-full text-xs p-2.5 border rounded-lg focus:ring-2 focus:ring-brand-700 uppercase">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-medium text-slate-700 mb-1">Graduation Year</label>
+                  <select id="claim-year" class="w-full text-xs p-2.5 border rounded-lg focus:ring-2 focus:ring-brand-700 bg-white">
+                    <option value="2020">2020</option>
+                    <option value="2018">2018</option>
+                    <option value="2014">2014</option>
+                    <option value="2022">2022</option>
+                    <option value="2023">2023</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-medium text-slate-700 mb-1">Academic Department</label>
+                <select id="claim-dept" class="w-full text-xs p-2.5 border rounded-lg focus:ring-2 focus:ring-brand-700 bg-white">
+                  <option value="Computer Science & Engineering">Computer Science & Engineering</option>
+                  <option value="Electronics & Communication">Electronics & Communication</option>
+                  <option value="Mechanical Engineering">Mechanical Engineering</option>
+                  <option value="Civil Engineering">Civil Engineering</option>
+                  <option value="School of Management">School of Management</option>
+                </select>
+              </div>
+
+              <button onclick="handleVerifyEnrolment()" class="w-full bg-brand-900 hover:bg-brand-800 text-white font-medium py-2.5 rounded-lg text-xs transition flex items-center justify-center space-x-2">
+                <i data-lucide="search" class="w-4 h-4"></i>
+                <span>Query Institutional Records</span>
+              </button>
+            </div>
+
+            <!-- Pre-Matched Status Card -->
+            <div id="erp-match-result" class="hidden bg-emerald-50 border border-emerald-200 p-4 rounded-lg space-y-3">
+              <div class="flex items-start justify-between">
+                <div>
+                  <div class="text-xs font-bold text-emerald-900 flex items-center space-x-1">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+                    <span>Match Found in Institutional Roster!</span>
+                  </div>
+                  <div id="matched-student-name" class="text-sm font-semibold text-slate-900 mt-1">Vikramaditya Mehta</div>
+                  <div id="matched-student-details" class="text-xs text-slate-600">B.Tech CSE • Roll: 14BCS042</div>
+                </div>
+                <span class="text-[10px] bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full font-semibold">PRE-VERIFIED</span>
+              </div>
+
+              <div class="text-xs text-slate-600 border-t border-emerald-200 pt-2">
+                A 6-digit OTP has been dispatched to: <strong id="matched-masked-contact">vi****@example.com / +91 98765 ****10</strong>
+              </div>
+
+              <div class="flex items-center space-x-2">
+                <input id="claim-otp-input" type="text" maxlength="6" placeholder="Enter 6-digit OTP (demo: 123456)" class="w-48 text-center tracking-widest font-mono text-sm p-2 border rounded-lg">
+                <button onclick="handleVerifyOTP()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-lg text-xs transition">
+                  Confirm OTP & Activate
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Manual Degree Upload Column -->
+          <div class="lg:col-span-5 space-y-5 border-t lg:border-t-0 lg:border-l lg:pl-8">
+            <div class="flex items-center space-x-2 text-sm font-semibold text-brand-900 border-b pb-2">
+              <span class="w-6 h-6 rounded-full bg-slate-200 text-brand-900 flex items-center justify-center text-xs">2</span>
+              <span>Method B: Manual Document Claim</span>
+            </div>
+
+            <p class="text-xs text-slate-600">Graduated before computerization or contact info changed? Submit your Degree / Provisional Certificate for Alumni Office human verification.</p>
+
+            <form onsubmit="handleManualClaim(event)" class="space-y-3">
+              <div>
+                <label class="block text-[11px] font-medium text-slate-700 mb-1">Full Legal Name</label>
+                <input id="manual-name" required type="text" placeholder="As printed on Degree Certificate" class="w-full text-xs p-2.5 border rounded-lg">
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[11px] font-medium text-slate-700 mb-1">Graduation Year</label>
+                  <input id="manual-year" required type="number" placeholder="e.g. 1998" class="w-full text-xs p-2.5 border rounded-lg">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-medium text-slate-700 mb-1">Department</label>
+                  <input id="manual-dept" required type="text" placeholder="e.g. Civil Engg" class="w-full text-xs p-2.5 border rounded-lg">
+                </div>
+              </div>
+              <div>
+                <label class="block text-[11px] font-medium text-slate-700 mb-1">Current Active Email</label>
+                <input id="manual-email" required type="email" placeholder="For activation link" class="w-full text-xs p-2.5 border rounded-lg">
+              </div>
+              <div>
+                <label class="block text-[11px] font-medium text-slate-700 mb-1">Upload Certificate (PDF / JPG)</label>
+                <input id="manual-file" type="file" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-900 hover:file:bg-brand-100 cursor-pointer border rounded-lg">
+              </div>
+              <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-medium py-2.5 rounded-lg text-xs transition">
+                Submit Claim to Alumni Office Queue
+              </button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 3: EVENTS & REUNIONS                                       -->
+    <!-- ============================================================== -->
+    <section id="view-events" class="tab-view hidden space-y-6">
+      
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-xl font-bold text-brand-900 flex items-center space-x-2">
+            <i data-lucide="calendar" class="w-5 h-5 text-gold-500"></i>
+            <span>Reunions, Chapters & Global Gatherings</span>
+          </h1>
+          <p class="text-xs text-slate-500">Participate in Silver Jubilee celebrations, local chapter networking, and guest masterclasses.</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <button onclick="showMyTicketPass()" class="bg-white border border-brand-800 text-brand-900 hover:bg-brand-50 font-semibold px-3 py-1.5 rounded-lg text-xs flex items-center space-x-1.5 transition shadow-sm">
+            <i data-lucide="qr-code" class="w-4 h-4 text-gold-500"></i>
+            <span>View My Active Pass (TKT-0941)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Events Catalog Grid -->
+      <div id="events-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 4: MENTORSHIP & CAREER NETWORK                             -->
+    <!-- ============================================================== -->
+    <section id="view-mentorship" class="tab-view hidden space-y-6">
+      
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-xl font-bold text-brand-900 flex items-center space-x-2">
+            <i data-lucide="briefcase" class="w-5 h-5 text-gold-500"></i>
+            <span>Career Network & Student Mentorship</span>
+          </h1>
+          <p class="text-xs text-slate-500">Connecting aspiring students and junior graduates with CXO and senior alumni mentors.</p>
+        </div>
+        <div>
+          <button onclick="openPostJobModal()" class="bg-brand-900 hover:bg-brand-800 text-white font-semibold px-3 py-1.5 rounded-lg text-xs flex items-center space-x-1.5 transition shadow">
+            <i data-lucide="plus" class="w-4 h-4 text-gold-500"></i>
+            <span>Post Alumni Job / Internship</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sub-tabs: Mentors vs Jobs -->
+      <div class="flex space-x-4 border-b border-slate-200">
+        <button onclick="toggleMentorshipSubtab('mentors')" id="subtab-mentors" class="pb-2 text-xs font-bold border-b-2 border-brand-900 text-brand-900">
+          Available Alumni Mentors (6)
+        </button>
+        <button onclick="toggleMentorshipSubtab('jobs')" id="subtab-jobs" class="pb-2 text-xs font-medium text-slate-500 hover:text-slate-800">
+          Alumni Referral Job Board (3)
+        </button>
+        <button onclick="toggleMentorshipSubtab('requests')" id="subtab-requests" class="pb-2 text-xs font-medium text-slate-500 hover:text-slate-800">
+          Mentorship Tracking Roster (2)
+        </button>
+      </div>
+
+      <!-- Mentors Panel -->
+      <div id="panel-mentors" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+
+      <!-- Jobs Panel -->
+      <div id="panel-jobs" class="hidden space-y-4">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+
+      <!-- Mentorship Tracking Panel -->
+      <div id="panel-requests" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h3 class="text-sm font-bold text-brand-900 mb-3">Active Student-Mentor Pairings</h3>
+        <div id="requests-list" class="space-y-3">
+          <!-- Rendered dynamically by app.js -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 5: GIVING & SECTION 80G TAX EXEMPTION                      -->
+    <!-- ============================================================== -->
+    <section id="view-giving" class="tab-view hidden space-y-6">
+      
+      <div class="bg-gradient-to-r from-brand-900 via-brand-800 to-slate-900 text-white rounded-2xl p-6 md:p-8 shadow-md">
+        <div class="max-w-3xl">
+          <div class="inline-flex items-center space-x-1.5 bg-gold-500/20 text-gold-500 px-3 py-1 rounded-full text-xs font-semibold mb-3 border border-gold-500/30">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+            <span>Indian IT Act Section 80G Compliant • Instant Form 10BD Certificate</span>
+          </div>
+          <h1 class="text-2xl md:text-3xl font-serif-title font-bold text-white leading-tight">
+            Empower the Next Generation of Engineers & Scholars
+          </h1>
+          <p class="text-xs md:text-sm text-slate-300 mt-2 leading-relaxed">
+            Support perpetual scholarships, AI supercomputing labs, or rural student fellowships. 100% of your contribution is eligible for income tax deduction under Section 80G of the Indian Income Tax Act.
+          </p>
+        </div>
+      </div>
+
+      <!-- Campaigns List -->
+      <div id="campaigns-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+
+      <!-- Recent Donors Wall of Honor & Tax Certificate Lookup -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Wall of Honor -->
+        <div class="lg:col-span-8 bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-brand-900 flex items-center space-x-2">
+              <i data-lucide="award" class="w-4 h-4 text-gold-500"></i>
+              <span>Recent Contributions & Wall of Honor</span>
+            </h3>
+            <span class="text-xs text-slate-400">Audited Financial Year 2026-27</span>
+          </div>
+          <div id="donations-ledger" class="space-y-3">
+            <!-- Rendered dynamically by app.js -->
+          </div>
+        </div>
+
+        <!-- 80G Instant Certificate Generator Card -->
+        <div class="lg:col-span-4 bg-slate-50 rounded-xl border border-slate-200 p-5 space-y-4">
+          <div class="flex items-center space-x-2 text-brand-900">
+            <i data-lucide="file-check" class="w-5 h-5 text-gold-500"></i>
+            <h4 class="text-xs font-bold uppercase tracking-wider">Instant 80G Tax Receipt</h4>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            All domestic donations generate a verified, cryptographically signed Section 80G certificate with QR code validation for your income tax return filing.
+          </p>
+          <div class="bg-white p-3 rounded-lg border border-slate-200 text-xs space-y-1.5">
+            <div class="flex justify-between text-slate-500">
+              <span>Institution PAN:</span>
+              <strong class="text-slate-800">AAATA0091K</strong>
+            </div>
+            <div class="flex justify-between text-slate-500">
+              <span>Tax Exemption Order:</span>
+              <strong class="text-slate-800">CIT(E)/BLR/80G</strong>
+            </div>
+            <div class="flex justify-between text-slate-500">
+              <span>Eligible Deduction:</span>
+              <strong class="text-emerald-700">50% Deduction</strong>
+            </div>
+          </div>
+          <button onclick="previewSample80G()" class="w-full bg-brand-900 hover:bg-brand-800 text-white font-medium py-2 rounded-lg text-xs transition flex items-center justify-center space-x-2">
+            <i data-lucide="eye" class="w-4 h-4"></i>
+            <span>Preview Official 80G Certificate</span>
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 6: STORIES & SPOTLIGHTS                                    -->
+    <!-- ============================================================== -->
+    <section id="view-stories" class="tab-view hidden space-y-6">
+      
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-xl font-bold text-brand-900 flex items-center space-x-2">
+            <i data-lucide="newspaper" class="w-5 h-5 text-gold-500"></i>
+            <span>Alumni Spotlights & Institution Chronicles</span>
+          </h1>
+          <p class="text-xs text-slate-500">Celebrating entrepreneurial milestones, public service achievements, and campus developments.</p>
+        </div>
+        <div>
+          <button onclick="openSubmitStoryModal()" class="bg-brand-900 hover:bg-brand-800 text-white font-semibold px-3 py-1.5 rounded-lg text-xs flex items-center space-x-1.5 transition shadow">
+            <i data-lucide="share-2" class="w-4 h-4 text-gold-500"></i>
+            <span>Share Your Achievement</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Stories Grid -->
+      <div id="stories-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 7: EXECUTIVE ANALYTICS & NIRF                             -->
+    <!-- ============================================================== -->
+    <section id="view-analytics" class="tab-view hidden space-y-6">
+      
+      <!-- Top KPIs Bar -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Living Alumni Base</div>
+          <div class="text-2xl font-bold text-brand-900 mt-1">50,240</div>
+          <div class="text-[11px] text-emerald-600 font-medium flex items-center mt-1">
+            <i data-lucide="trending-up" class="w-3 h-3 mr-1"></i> 31,480 Verified (62.7%)
+          </div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Annual Giving (2026 YTD)</div>
+          <div class="text-2xl font-bold text-brand-900 mt-1">₹ 2.71 Cr</div>
+          <div class="text-[11px] text-emerald-600 font-medium flex items-center mt-1">
+            <i data-lucide="trending-up" class="w-3 h-3 mr-1"></i> +23% vs FY 2025
+          </div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Active Mentorships</div>
+          <div class="text-2xl font-bold text-brand-900 mt-1">420 Pairings</div>
+          <div class="text-[11px] text-brand-700 font-medium flex items-center mt-1">
+            <i data-lucide="check" class="w-3 h-3 mr-1"></i> 94% Student Satisfaction
+          </div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">NIRF Outcome Tracking</div>
+          <div class="text-2xl font-bold text-brand-900 mt-1">74.8%</div>
+          <div class="text-[11px] text-emerald-600 font-medium flex items-center mt-1">
+            <i data-lucide="award" class="w-3 h-3 mr-1"></i> NAAC Metric 5.2.2 Ready
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Chart 1: Global Footprint -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <h3 class="text-xs font-bold text-brand-900 uppercase tracking-wider mb-4 flex items-center space-x-1.5">
+            <i data-lucide="globe" class="w-4 h-4 text-gold-500"></i>
+            <span>Geographic Distribution (Domestic & International)</span>
+          </h3>
+          <div class="h-64">
+            <canvas id="chart-geo"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 2: Sector Breakdown -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <h3 class="text-xs font-bold text-brand-900 uppercase tracking-wider mb-4 flex items-center space-x-1.5">
+            <i data-lucide="pie-chart" class="w-4 h-4 text-gold-500"></i>
+            <span>Employment by Industry Sectors</span>
+          </h3>
+          <div class="h-64">
+            <canvas id="chart-sector"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 3: Giving Progression -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm lg:col-span-2">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center space-x-1.5">
+              <i data-lucide="bar-chart-2" class="w-4 h-4 text-gold-500"></i>
+              <span>Alumni Giving & Endowment Growth (FY 2022 - FY 2026 in Crores INR)</span>
+            </h3>
+            <button onclick="alert('Exporting NIRF Criteria 5 Graduate Outcome Audit Matrix to CSV...')" class="text-xs text-brand-800 hover:text-brand-900 font-semibold border border-slate-300 px-3 py-1 rounded">
+              Export NIRF Compliance CSV
+            </button>
+          </div>
+          <div class="h-60">
+            <canvas id="chart-giving"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 8: DATA GOVERNANCE & DPDP ACT 2023                         -->
+    <!-- ============================================================== -->
+    <section id="view-governance" class="tab-view hidden space-y-6">
+      
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4 mb-4">
+          <div>
+            <div class="inline-flex items-center space-x-1 text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full mb-1">
+              <i data-lucide="shield" class="w-3 h-3"></i>
+              <span>DPDP ACT 2023 & AUDIT CONTROLS</span>
+            </div>
+            <h1 class="text-lg font-bold text-brand-900">Alumni Data Quality, Deduplication & Governance Console</h1>
+            <p class="text-xs text-slate-500">Resolve duplicate profile conflicts, audit consent logs, and approve pending document claims.</p>
+          </div>
+          <button onclick="triggerDataRefreshCampaign()" class="bg-gold-500 hover:bg-gold-600 text-brand-900 font-semibold px-3 py-2 rounded-lg text-xs flex items-center space-x-1.5 transition">
+            <i data-lucide="send" class="w-4 h-4"></i>
+            <span>Trigger WhatsApp Profile Refresh Campaign</span>
+          </button>
+        </div>
+
+        <!-- Governance Subsections -->
+        <div class="space-y-6">
+          
+          <!-- Section A: Duplicate Merge Side-by-Side Queue -->
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-brand-900 flex items-center space-x-1.5">
+                <i data-lucide="copy" class="w-4 h-4 text-amber-600"></i>
+                <span>Flagged Duplicates for Reconciliation (1 Flagged)</span>
+              </h3>
+              <span class="text-xs text-slate-400">Levenshtein String Distance Match &gt; 90%</span>
+            </div>
+            <div id="duplicate-container" class="space-y-3">
+              <!-- Rendered dynamically by app.js -->
+            </div>
+          </div>
+
+          <!-- Section B: Pending Document Claims Queue -->
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-brand-900 flex items-center space-x-1.5">
+                <i data-lucide="inbox" class="w-4 h-4 text-blue-600"></i>
+                <span>Pending Manual Document Verification Queue (2 Pending)</span>
+              </h3>
+              <span class="text-xs text-slate-400">Alumni Office Approval Workflow</span>
+            </div>
+            <div id="pending-claims-container" class="space-y-2">
+              <!-- Rendered dynamically by app.js -->
+            </div>
+          </div>
+
+          <!-- Section C: DPDP Act 2023 Consent Audit Trail -->
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-brand-900 flex items-center space-x-1.5">
+                <i data-lucide="scroll" class="w-4 h-4 text-slate-600"></i>
+                <span>Immutable Consent & PII Access Audit Logs</span>
+              </h3>
+              <span class="text-xs text-slate-400">Tamper-Proof Audit Vault</span>
+            </div>
+            <div class="border rounded-lg overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-100 text-slate-600 font-semibold border-b">
+                  <tr>
+                    <th class="p-3">Timestamp</th>
+                    <th class="p-3">User / Actor Email</th>
+                    <th class="p-3">Event Type</th>
+                    <th class="p-3">Details</th>
+                    <th class="p-3">IP Address</th>
+                  </tr>
+                </thead>
+                <tbody id="audit-log-rows" class="divide-y text-slate-700">
+                  <!-- Rendered dynamically by app.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- TAB 9: MY PROFILE & DIGITAL ID CARD                            -->
+    <!-- ============================================================== -->
+    <section id="view-my-profile" class="tab-view hidden space-y-6">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Column: Digital Alumni ID Card -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="alumni-card-gradient text-white rounded-2xl p-6 relative overflow-hidden shadow-xl">
+            <!-- Institutional Watermark -->
+            <div class="absolute -right-6 -bottom-6 w-36 h-36 rounded-full border-8 border-white/5 pointer-events-none"></div>
+            
+            <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded bg-gold-500 flex items-center justify-center text-brand-900 font-bold">
+                  <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold tracking-widest text-gold-500 uppercase">Apex Institute of Science & Tech</div>
+                  <div class="text-[9px] text-slate-300">Official Lifetime Alumni Pass</div>
+                </div>
+              </div>
+              <span class="text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-semibold">VERIFIED</span>
+            </div>
+
+            <div class="flex items-start space-x-4 mb-5">
+              <img id="my-card-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Alumnus" class="w-16 h-16 rounded-xl object-cover border-2 border-gold-500 shadow">
+              <div>
+                <div id="my-card-name" class="text-base font-bold text-white leading-tight">Vikramaditya Mehta</div>
+                <div id="my-card-roll" class="text-xs text-gold-500 font-mono mt-0.5">Roll: 14BCS042</div>
+                <div id="my-card-degree" class="text-xs text-slate-300 mt-1">B.Tech • Computer Science & Engg</div>
+                <div id="my-card-batch" class="text-xs text-slate-400">Class of 2018 • Main Campus</div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between bg-black/30 p-3 rounded-xl border border-white/10">
+              <div>
+                <div class="text-[10px] text-slate-400 uppercase tracking-wider">Gate Access Pass Code</div>
+                <div class="text-xs font-mono font-bold text-white mt-0.5">PASS-AIST-8849-VERIFIED</div>
+              </div>
+              <div id="card-qr" class="bg-white p-1 rounded shadow">
+                <!-- QR injected via app.js -->
+              </div>
+            </div>
+
+            <div class="text-[9px] text-center text-slate-400 mt-3">
+              Valid for entry across all 3 campuses, Central Library & Alumni Club.
+            </div>
+          </div>
+
+          <!-- Profile Health Gauge -->
+          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-bold text-brand-900">Profile Completeness Score</span>
+              <span class="font-bold text-emerald-600" id="profile-pct-text">95% (Grade A)</span>
+            </div>
+            <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+              <div id="profile-pct-bar" class="bg-emerald-500 h-2.5 rounded-full" style="width: 95%;"></div>
+            </div>
+            <p class="text-[11px] text-slate-500">
+              Your profile is verified. Complete profiles receive 3x more mentorship requests and alumni recruitment messages.
+            </p>
+          </div>
+        </div>
+
+        <!-- Right Column: Profile Fields & DPDP Consent Toggles -->
+        <div class="lg:col-span-7 bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-5">
+          <div class="border-b pb-3 flex justify-between items-center">
+            <div>
+              <h2 class="text-sm font-bold text-brand-900">Profile Details & DPDP Act 2023 Consent Controls</h2>
+              <p class="text-xs text-slate-500">Fine-tune your privacy settings and contact visibility.</p>
+            </div>
+            <button onclick="saveProfileChanges()" class="bg-brand-900 hover:bg-brand-800 text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition">
+              Save Changes
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[11px] font-medium text-slate-700 mb-1">Current Employer</label>
+              <input id="edit-company" type="text" value="Google Cloud" class="w-full text-xs p-2.5 border rounded-lg">
+            </div>
+            <div>
+              <label class="block text-[11px] font-medium text-slate-700 mb-1">Current Designation</label>
+              <input id="edit-designation" type="text" value="Staff Software Engineer" class="w-full text-xs p-2.5 border rounded-lg">
+            </div>
+            <div>
+              <label class="block text-[11px] font-medium text-slate-700 mb-1">Current City</label>
+              <input id="edit-city" type="text" value="Bengaluru" class="w-full text-xs p-2.5 border rounded-lg">
+            </div>
+            <div>
+              <label class="block text-[11px] font-medium text-slate-700 mb-1">Country</label>
+              <input id="edit-country" type="text" value="India" class="w-full text-xs p-2.5 border rounded-lg">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-medium text-slate-700 mb-1">Skills & Domains (Comma Separated)</label>
+            <input id="edit-skills" type="text" value="Distributed Systems, Kubernetes, Golang, System Design" class="w-full text-xs p-2.5 border rounded-lg">
+          </div>
+
+          <!-- DPDP Consent & Privacy Toggles -->
+          <div class="border-t pt-4 space-y-3">
+            <h4 class="text-xs font-bold text-slate-900 flex items-center space-x-1.5">
+              <i data-lucide="lock" class="w-4 h-4 text-gold-500"></i>
+              <span>Data Protection & Privacy Configuration</span>
+            </h4>
+
+            <div class="space-y-2 text-xs">
+              <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 border">
+                <div>
+                  <div class="font-medium text-slate-800">Email Address Visibility</div>
+                  <div class="text-[11px] text-slate-500">Control who can discover your verified email in search.</div>
+                </div>
+                <select id="privacy-email" class="text-xs border rounded p-1.5 bg-white">
+                  <option value="BATCH_ONLY">Batch Mates Only</option>
+                  <option value="PUBLIC_VERIFIED">All Verified Alumni</option>
+                  <option value="ADMIN_ONLY">Private (Admin Only)</option>
+                </select>
+              </div>
+
+              <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 border">
+                <div>
+                  <div class="font-medium text-slate-800">WhatsApp Event Broadcasts</div>
+                  <div class="text-[11px] text-slate-500">Receive reunion RSVPs, ticket passes & critical alerts on WhatsApp.</div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="privacy-whatsapp" checked class="sr-only peer">
+                  <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                </label>
+              </div>
+
+              <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 border">
+                <div>
+                  <div class="font-medium text-slate-800">Available as Student Mentor</div>
+                  <div class="text-[11px] text-slate-500">Allow enrolled 3rd/4th year students to request guidance.</div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="privacy-mentor" checked class="sr-only peer">
+                  <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-900"></div>
+                </label>
+              </div>
+            </div>
+
+            <div class="pt-2 flex justify-between items-center text-xs text-slate-400">
+              <span>DPDP Act 2023 Compliant</span>
+              <button onclick="requestDataErasure()" class="text-rose-600 hover:text-rose-700 underline">Request Account Erasure (Right to be Forgotten)</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- MODALS CONTAINER                                               -->
+  <!-- ============================================================== -->
+
+  <!-- 1. Profile Quickview Modal -->
+  <div id="modal-profile" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative space-y-4">
+      <button onclick="closeModal('modal-profile')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-start space-x-4">
+        <img id="mp-avatar" src="" alt="Alumnus" class="w-16 h-16 rounded-xl object-cover border-2 border-gold-500">
+        <div>
+          <div class="flex items-center space-x-2">
+            <h3 id="mp-name" class="text-base font-bold text-brand-900"></h3>
+            <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">VERIFIED</span>
+          </div>
+          <div id="mp-designation" class="text-xs text-slate-700 font-medium mt-0.5"></div>
+          <div id="mp-degree" class="text-xs text-slate-500 mt-0.5"></div>
+          <div id="mp-location" class="text-xs text-slate-400 flex items-center mt-1">
+            <i data-lucide="map-pin" class="w-3 h-3 mr-1"></i> <span id="mp-loc-text"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-50 p-3 rounded-lg border text-xs space-y-1">
+        <div class="font-semibold text-slate-700">Biography:</div>
+        <p id="mp-bio" class="text-slate-600 leading-relaxed"></p>
+      </div>
+
+      <div>
+        <div class="text-xs font-semibold text-slate-700 mb-1.5">Expertise & Skills:</div>
+        <div id="mp-skills" class="flex flex-wrap gap-1.5"></div>
+      </div>
+
+      <div class="border-t pt-3 flex justify-between items-center text-xs">
+        <span class="text-slate-400">Email: <strong id="mp-email" class="text-slate-700 font-normal"></strong></span>
+        <button onclick="triggerInMail()" class="bg-brand-900 hover:bg-brand-800 text-white font-semibold px-4 py-2 rounded-lg transition flex items-center space-x-1.5">
+          <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+          <span>Send InMail Request</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Mentorship Apply Modal -->
+  <div id="modal-mentorship" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative space-y-4">
+      <button onclick="closeModal('modal-mentorship')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center space-x-2 text-brand-900 border-b pb-3">
+        <i data-lucide="user-plus" class="w-5 h-5 text-gold-500"></i>
+        <h3 class="text-base font-bold">Request Mentorship Session</h3>
+      </div>
+
+      <form onsubmit="submitMentorshipApplication(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="apply-mentor-id">
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Selected Mentor</label>
+          <input id="apply-mentor-name" readonly class="w-full p-2 bg-slate-100 rounded border font-semibold text-slate-800">
+        </div>
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Your Name</label>
+          <input id="apply-student-name" required value="Arjun Rathore" class="w-full p-2 border rounded">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Roll Number</label>
+            <input id="apply-student-roll" required value="23BCS019" class="w-full p-2 border rounded">
+          </div>
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Year of Study</label>
+            <select id="apply-student-year" class="w-full p-2 border rounded bg-white">
+              <option value="3rd Year UG">3rd Year UG</option>
+              <option value="4th Year UG">4th Year UG</option>
+              <option value="PG / Masters">PG / Masters</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Mentorship Focus Topic</label>
+          <select id="apply-topic" class="w-full p-2 border rounded bg-white">
+            <option value="System Design & Cloud Architecture Prep">System Design & Cloud Architecture Prep</option>
+            <option value="Higher Education (MS/PhD in US/Europe)">Higher Education (MS/PhD in US/Europe)</option>
+            <option value="Civil Services Examination (UPSC) Strategy">Civil Services Examination (UPSC) Strategy</option>
+            <option value="Startup Fundraising & Venture Capital">Startup Fundraising & Venture Capital</option>
+            <option value="General Resume & Career Guidance">General Resume & Career Guidance</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Your Statement / Questions</label>
+          <textarea id="apply-message" rows="3" required placeholder="Briefly describe what you would like advice on..." class="w-full p-2 border rounded"></textarea>
+        </div>
+        <button type="submit" class="w-full bg-brand-900 hover:bg-brand-800 text-white font-semibold py-2.5 rounded-lg transition">
+          Submit Mentorship Request
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Razorpay / UPI Donation Checkout Modal -->
+  <div id="modal-donation" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative space-y-4">
+      <button onclick="closeModal('modal-donation')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center space-x-2 border-b pb-3">
+        <div class="w-8 h-8 rounded-full bg-gold-100 flex items-center justify-center text-gold-600">
+          <i data-lucide="heart" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-brand-900">Make an Institutional Contribution</h3>
+          <p class="text-[10px] text-slate-500">Sec 80G Tax Exemption Eligible</p>
+        </div>
+      </div>
+
+      <form onsubmit="handleDonationSubmit(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="donate-campaign-id">
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Designated Campaign</label>
+          <input id="donate-campaign-title" readonly class="w-full p-2 bg-slate-100 rounded border font-semibold text-slate-800">
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1.5">Select Contribution Amount (INR)</label>
+          <div class="grid grid-cols-4 gap-2 mb-2">
+            <button type="button" onclick="setDonationAmt(5000)" class="amt-btn border py-1.5 rounded font-medium hover:bg-brand-50">₹ 5,000</button>
+            <button type="button" onclick="setDonationAmt(10000)" class="amt-btn border py-1.5 rounded font-medium hover:bg-brand-50">₹ 10,000</button>
+            <button type="button" onclick="setDonationAmt(25000)" class="amt-btn border py-1.5 rounded font-medium hover:bg-brand-50">₹ 25,000</button>
+            <button type="button" onclick="setDonationAmt(50000)" class="amt-btn border py-1.5 rounded font-medium hover:bg-brand-50">₹ 50,000</button>
+          </div>
+          <input id="donate-amount" type="number" required placeholder="Or custom amount" class="w-full p-2 border rounded font-semibold text-brand-900">
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 p-2.5 rounded-lg text-amber-900 text-[11px] space-y-2">
+          <div class="font-bold flex items-center space-x-1">
+            <i data-lucide="info" class="w-3.5 h-3.5"></i>
+            <span>Indian Tax Exemption (Sec 80G) Details</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-medium text-[10px] mb-0.5">Permanent Account No (PAN)</label>
+              <input id="donate-pan" required maxlength="10" placeholder="e.g. ABCDE1234F" class="w-full p-1.5 border rounded uppercase bg-white font-mono">
+            </div>
+            <div>
+              <label class="block font-medium text-[10px] mb-0.5">Donor Full Name</label>
+              <input id="donate-name" required value="Vikramaditya Mehta" class="w-full p-1.5 border rounded bg-white">
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <input id="donate-anon" type="checkbox" class="rounded text-brand-900">
+          <label for="donate-anon" class="text-slate-600">Make this contribution anonymous on the public Wall of Honor</label>
+        </div>
+
+        <div class="border-t pt-3">
+          <div class="text-[11px] font-semibold text-slate-700 mb-2">Simulated Payment Rails:</div>
+          <div class="grid grid-cols-3 gap-2">
+            <label class="border p-2 rounded flex flex-col items-center justify-center cursor-pointer bg-slate-50 border-brand-900">
+              <input type="radio" name="pay-rail" value="UPI" checked class="sr-only">
+              <span class="font-bold text-xs">UPI / QR</span>
+              <span class="text-[9px] text-slate-500">GPay, PhonePe</span>
+            </label>
+            <label class="border p-2 rounded flex flex-col items-center justify-center cursor-pointer bg-slate-50">
+              <input type="radio" name="pay-rail" value="CARDS" class="sr-only">
+              <span class="font-bold text-xs">Cards</span>
+              <span class="text-[9px] text-slate-500">Debit / Credit</span>
+            </label>
+            <label class="border p-2 rounded flex flex-col items-center justify-center cursor-pointer bg-slate-50">
+              <input type="radio" name="pay-rail" value="NETBANKING" class="sr-only">
+              <span class="font-bold text-xs">Net Banking</span>
+              <span class="text-[9px] text-slate-500">50+ Banks</span>
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-brand-900 hover:bg-brand-800 text-white font-semibold py-2.5 rounded-lg transition flex items-center justify-center space-x-2">
+          <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+          <span>Process Gift & Issue Instant 80G Receipt</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Official Section 80G Certificate Modal -->
+  <div id="modal-80g-certificate" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative space-y-5 overflow-y-auto max-h-[90vh]">
+      <button onclick="closeModal('modal-80g-certificate')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Printable Certificate Container -->
+      <div id="tax-receipt-printable" class="border-4 border-double border-brand-900 p-6 bg-slate-50 rounded-xl space-y-4">
+        
+        <div class="text-center border-b border-brand-900/30 pb-4">
+          <div class="font-serif-title font-bold text-lg text-brand-900">APEX INSTITUTE OF SCIENCE & TECHNOLOGY</div>
+          <div class="text-[10px] text-slate-600 uppercase tracking-widest">Office of Institutional Advancement & Endowment</div>
+          <div class="text-xs font-semibold text-gold-600 mt-1">RECEIPT UNDER SECTION 80G OF THE INCOME TAX ACT, 1961</div>
+          <div class="text-[10px] text-slate-500">Registration Order: CIT(E)/BLR/80G/2021-22/A/10294 • PAN: AAATA0091K</div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 text-xs">
+          <div>
+            <span class="text-slate-500">Receipt No:</span>
+            <div id="cert-receipt-no" class="font-mono font-bold text-brand-900">AIST/80G/2026-27/00492</div>
+          </div>
+          <div class="text-right">
+            <span class="text-slate-500">Date of Issue:</span>
+            <div id="cert-date" class="font-semibold text-slate-800">2026-10-18</div>
+          </div>
+          <div>
+            <span class="text-slate-500">Received With Thanks From:</span>
+            <div id="cert-donor-name" class="font-bold text-slate-900">Vikramaditya Mehta</div>
+          </div>
+          <div class="text-right">
+            <span class="text-slate-500">Donor PAN:</span>
+            <div id="cert-donor-pan" class="font-mono font-bold text-brand-900">ABCDE1234F</div>
+          </div>
+        </div>
+
+        <div class="bg-white p-3 rounded-lg border text-xs flex justify-between items-center">
+          <div>
+            <span class="text-slate-500">Donation Amount:</span>
+            <div id="cert-amount" class="text-lg font-bold text-brand-900">₹ 50,000.00</div>
+          </div>
+          <div class="text-right">
+            <span class="text-slate-500">Eligible Deduction (50%):</span>
+            <div id="cert-deduction" class="text-lg font-bold text-emerald-700">₹ 25,000.00</div>
+          </div>
+        </div>
+
+        <div class="text-xs text-slate-600 leading-relaxed border-t pt-3">
+          This donation has been credited towards: <strong id="cert-campaign">Centre for Artificial Intelligence & Quantum Computing</strong>.
+          The donation is eligible for tax deduction under Section 80G(5)(vi) of the Income Tax Act, 1961. This certificate has been submitted for filing under annual Form 10BD.
+        </div>
+
+        <div class="flex justify-between items-end pt-4 border-t border-dashed">
+          <div id="cert-qr" class="bg-white p-1 rounded border"></div>
+          <div class="text-center text-xs">
+            <div class="font-quote text-sm text-brand-900 italic">Dr. K. S. Narayanan</div>
+            <div class="text-[10px] text-slate-500 font-semibold border-t pt-0.5">Comptroller & Finance Officer</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="flex justify-end space-x-3 text-xs">
+        <button onclick="window.print()" class="bg-white border border-slate-300 hover:bg-slate-50 font-semibold px-4 py-2 rounded-lg flex items-center space-x-1.5 transition">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>Print / Save as PDF</span>
+        </button>
+        <button onclick="closeModal('modal-80g-certificate')" class="bg-brand-900 hover:bg-brand-800 text-white font-semibold px-4 py-2 rounded-lg transition">
+          Done
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 5. Event QR Ticket Pass Modal -->
+  <div id="modal-ticket" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl relative space-y-4 text-center">
+      <button onclick="closeModal('modal-ticket')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
+        <i data-lucide="check" class="w-6 h-6"></i>
+      </div>
+
+      <div>
+        <h3 class="text-base font-bold text-brand-900">Official Campus Event Pass</h3>
+        <p class="text-xs text-slate-500 mt-0.5">Silver Jubilee Grand Alumni Reunion (2001)</p>
+      </div>
+
+      <div class="bg-slate-50 p-4 rounded-xl border flex flex-col items-center space-y-3">
+        <div id="ticket-qr" class="bg-white p-2 rounded shadow"></div>
+        <div class="text-xs font-mono font-bold text-brand-900" id="tkt-number">TKT-AIST-2026-0941</div>
+        <div class="text-[11px] text-slate-500">Attendee: <strong>Vikramaditya Mehta</strong> (Class of '18)</div>
+      </div>
+
+      <div class="text-[11px] text-slate-400">
+        Show this dynamic QR code at the Main Campus Gate & Amphitheater registration desk for badge printing.
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Duplicate Merge Review Modal (Admin only) -->
+  <div id="modal-merge" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative space-y-4">
+      <button onclick="closeModal('modal-merge')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center space-x-2 text-brand-900 border-b pb-3">
+        <i data-lucide="git-merge" class="w-5 h-5 text-amber-600"></i>
+        <h3 class="text-base font-bold">Data Governance: Duplicate Profile Merge Resolution</h3>
+      </div>
+
+      <p class="text-xs text-slate-600">
+        The fuzzy matching engine detected conflicting contact/employment data for the same student enrolment number. Select the authoritative attributes to update the Golden Record.
+      </p>
+
+      <div class="grid grid-cols-2 gap-4 text-xs">
+        <!-- Record A (Legacy) -->
+        <div class="border rounded-xl p-4 bg-slate-50 space-y-2">
+          <div class="font-bold text-slate-800 border-b pb-1 flex justify-between">
+            <span>Source A: Legacy Excel Roster</span>
+            <span class="text-[10px] text-slate-400">2018</span>
+          </div>
+          <div>Name: <strong>Rahul Verma</strong></div>
+          <div>Roll: <strong>14BCS092</strong></div>
+          <div>Email: <strong>r.verma.2014@gmail.com</strong></div>
+          <div>Company: <strong>Infosys Ltd</strong></div>
+          <button onclick="confirmMerge('A')" class="w-full mt-3 bg-white border border-slate-300 hover:bg-slate-100 py-1.5 rounded font-medium text-slate-700">
+            Retain Record A
+          </button>
+        </div>
+
+        <!-- Record B (Self Registration) -->
+        <div class="border border-emerald-300 rounded-xl p-4 bg-emerald-50/50 space-y-2">
+          <div class="font-bold text-brand-900 border-b border-emerald-200 pb-1 flex justify-between">
+            <span>Source B: Verified Portal Self-Claim</span>
+            <span class="text-[10px] text-emerald-700 font-semibold">RECOMMENDED</span>
+          </div>
+          <div>Name: <strong>Rahul K. Verma</strong></div>
+          <div>Roll: <strong>14BCS092</strong></div>
+          <div>Email: <strong>rahul.verma@uber.com</strong></div>
+          <div>Company: <strong>Uber Technologies (Sr Staff)</strong></div>
+          <button onclick="confirmMerge('B')" class="w-full mt-3 bg-emerald-600 hover:bg-emerald-700 text-white py-1.5 rounded font-semibold transition">
+            Merge & Adopt Record B (Recommended)
+          </button>
+        </div>
+      </div>
+
+      <div class="text-[11px] text-slate-400">
+        Every merge operation is logged to the immutable DPDP Act 2023 Audit Vault.
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLICATION SCRIPTS -->
+  <script src="/static/app.js"></script>
+</body>
+</html>
